@@ -371,7 +371,7 @@ export default function HomePage() {
                     <div className="text-2xl font-bold">2.</div>
                     <h3 className="font-semibold">Connect Playwright</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use CDP to connect Playwright to the browser
+                      Use CDP to connect your favorite automation framework to the browser
                     </p>
                   </div>
                 </CardContent>
