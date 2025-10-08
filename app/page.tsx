@@ -34,11 +34,13 @@ export default function HomePage() {
     AutomationResult[]
   >([]);
   const [error, setError] = useState<string | null>(null);
+  const [deployUrl, setDeployUrl] = useState<string | null>(null);
   const [targetUrl, setTargetUrl] = useState("https://onkernel.com");
 
   const createBrowser = async () => {
     setCreatingBrowser(true);
     setError(null);
+    setDeployUrl(null);
 
     try {
       const response = await fetch("/api/create-browser", {
@@ -55,7 +57,10 @@ export default function HomePage() {
           spinUpTime: data.spinUpTime,
         });
       } else {
-        setError(data.error || "Failed to create browser");
+        if (data.error === "MISSING_API_KEY" && data.deployUrl) {
+          setDeployUrl(data.deployUrl);
+        }
+        setError(data.message || data.error || "Failed to create browser");
       }
     } catch (err) {
       setError(
@@ -175,6 +180,24 @@ export default function HomePage() {
                       <span className="font-semibold">Error</span>
                     </div>
                     <p className="font-mono text-sm text-red-600">{error}</p>
+                    {deployUrl && (
+                      <div className="pt-2">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Deploy this template with the Kernel integration to get started:
+                        </p>
+                        <a
+                          href={deployUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block"
+                        >
+                          <img
+                            src="https://vercel.com/button"
+                            alt="Deploy with Vercel"
+                          />
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

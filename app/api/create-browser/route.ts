@@ -7,8 +7,13 @@ export async function POST() {
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "KERNEL_API_KEY environment variable is not set" },
-        { status: 500 }
+        {
+          error: "MISSING_API_KEY",
+          message: "KERNEL_API_KEY environment variable is not set",
+          deployUrl:
+            "https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fnextjs-kernel-template&project-name=nextjs-kernel-template&repository-name=nextjs-kernel-template&integration-ids=oac_NEj8KPenfKQGUrRTVRrZL3vV&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22%22%2C%22protocol%22%3A%22other%22%7D%5D",
+        },
+        { status: 400 }
       );
     }
 
@@ -45,4 +50,3 @@ export async function POST() {
     );
   }
 }
-
