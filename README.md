@@ -15,7 +15,7 @@ This template shows how to:
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
+- **Framework**: Next.js with App Router
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
 - **Browser Automation**: Kernel SDK + Playwright
