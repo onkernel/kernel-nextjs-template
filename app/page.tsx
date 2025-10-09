@@ -141,7 +141,7 @@ export default function HomePage() {
             {/* Hero Section */}
             <div className="space-y-4">
               <h2 className="text-4xl lg:text-5xl font-bold text-balance">
-                Browser Automation with Kernel
+                Browser Automations with Kernel
               </h2>
               <p className="text-lg text-muted-foreground text-balance">
                 See how fast Kernel browsers spin up, then watch live as
