@@ -2,7 +2,7 @@
 
 A Next.js template demonstrating how to use the Kernel SDK with Playwright for browser automation in Vercel functions.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fnextjs-kernel-template&project-name=nextjs-kernel-template&repository-name=nextjs-kernel-template&demo-title=Kernel+%26+Vercel+Template&demo-description=Example+Next.js+app+showing+how+to+use+Kernel+SDK+with+Playwright+in+Vercel+functions&demo-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fnextjs-kernel-template&demo-image=https%3A%2F%2Fraw.githubusercontent.com%2Fonkernel%2Fnextjs-kernel-template%2Frefs%2Fheads%2Fmain%2Fpublic%2Fvercel-kernel-hero.png%3Ftoken%3DGHSAT0AAAAAADG6RHG4ORBL22MF6TL7FF3C2HG2M2Q&integration-ids=oac_NEj8KPenfKQGUrRTVRrZL3vV)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fkernel-nextjs-template&project-name=kernel-nextjs-template&repository-name=kernel-nextjs-template&integration-ids=oac_NEj8KPenfKQGUrRTVRrZL3vV&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22kernel%22%2C%22protocol%22%3A%22other%22%7D%5D)
 
 ## Overview
 
