@@ -145,7 +145,7 @@ export default function HomePage() {
               </h2>
               <p className="text-lg text-muted-foreground text-balance">
                 See how fast Kernel browsers spin up, then watch live as
-                Playwright navigates to any URL in the cloud.
+                your automation navigates to any URL in the cloud.
               </p>
             </div>
 
@@ -392,9 +392,9 @@ export default function HomePage() {
                 <CardContent>
                   <div className="space-y-2">
                     <div className="text-2xl font-bold">2.</div>
-                    <h3 className="font-semibold">Connect Playwright</h3>
+                    <h3 className="font-semibold">Connect via CDP</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use CDP to connect your favorite automation framework to the browser
+                      Use CDP to connect your favorite automation framework
                     </p>
                   </div>
                 </CardContent>

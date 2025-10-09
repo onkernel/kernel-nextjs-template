@@ -1,6 +1,6 @@
 # Kernel + Vercel Template
 
-A Next.js template demonstrating how to use the Kernel SDK with Playwright for browser automation in Vercel functions.
+A Next.js template demonstrating how to run browser automations in Vercel serverless functions, powered by Kernel.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fkernel-nextjs-template&project-name=kernel-nextjs-template&repository-name=kernel-nextjs-template&integration-ids=oac_NEj8KPenfKQGUrRTVRrZL3vV&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22kernel%22%2C%22protocol%22%3A%22other%22%7D%5D)
 
@@ -9,7 +9,7 @@ A Next.js template demonstrating how to use the Kernel SDK with Playwright for b
 This template shows how to:
 
 - Create cloud browsers using the Kernel SDK
-- Connect Playwright to Kernel browsers via CDP
+- Connect to Kernel browsers via CDP
 - Run browser automation scripts in Vercel serverless functions
 - Display results in a modern Next.js UI
 
@@ -18,7 +18,7 @@ This template shows how to:
 - **Framework**: Next.js with App Router
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
-- **Browser Automation**: Kernel SDK + Playwright
+- **Browser Automation**: Kernel SDK + Your Favorite Automation Framework
 - **Deployment**: Vercel
 
 ## Getting Started
@@ -76,8 +76,8 @@ This template shows how to:
 ## How It Works
 
 1. **Browser Creation**: When you click "Run Browser Automation", the API route creates a headless browser using the Kernel SDK
-2. **Playwright Connection**: The code connects Playwright to the Kernel browser via CDP (Chrome DevTools Protocol)
-3. **Script Execution**: A simple Playwright script navigates to onkernel.com and retrieves the page title
+2. **CDP Connection**: Connect to the Kernel browser via CDP (Chrome DevTools Protocol) using your preferred automation framework
+3. **Script Execution**: Your automation script navigates to any URL and performs actions
 4. **Cleanup**: The browser is automatically deleted after the script completes
 
 ## Code Structure
@@ -147,7 +147,6 @@ Make sure to add this environment variable in your Vercel project settings:
 
 - [Kernel Documentation](https://docs.onkernel.com)
 - [Kernel API Reference](https://docs.onkernel.com/api-reference)
-- [Playwright Documentation](https://playwright.dev)
 - [Next.js Documentation](https://nextjs.org/docs)
 
 ## License
