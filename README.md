@@ -8,17 +8,18 @@ A Next.js template demonstrating how to run browser automations in Vercel server
 
 This template shows how to:
 
-- Create cloud browsers using the Kernel SDK
-- Connect to Kernel browsers via CDP
-- Run browser automation scripts in Vercel serverless functions
-- Display results in a modern Next.js UI
+- Create headful cloud browsers with live view using the Kernel SDK
+- Connect automation frameworks (like Playwright) to Kernel browsers via CDP
+- Run browser automations in Next.js API routes
+- Display live browser view and automation results in a modern Next.js UI
 
 ## Tech Stack
 
-- **Framework**: Next.js with App Router
+- **Framework**: Next.js 15 with App Router
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
-- **Browser Automation**: Kernel SDK + Your Favorite Automation Framework
+- **Browser Automation**: Kernel SDK + Playwright
+- **Package Manager**: Bun
 - **Deployment**: Vercel
 
 ## Getting Started
@@ -26,6 +27,7 @@ This template shows how to:
 ### Prerequisites
 
 - Node.js 18+
+- [Bun](https://bun.sh) (package manager)
 - A Kernel account and API key
 - Vercel account (optional, for deployment)
 
@@ -41,7 +43,7 @@ This template shows how to:
 2. **Install dependencies**:
 
    ```bash
-   pnpm install
+   bun install
    ```
 
 3. **Set up Kernel**:
@@ -53,10 +55,10 @@ This template shows how to:
 
 4. **Configure environment variables**:
 
-   Create a `.env.local` file:
+   Create a `.env` file:
 
    ```bash
-   cp .env.example .env.local
+   touch .env
    ```
 
    Add your Kernel API key:
@@ -68,55 +70,85 @@ This template shows how to:
 5. **Run the development server**:
 
    ```bash
-   pnpm dev
+   bun dev
    ```
 
 6. **Open** [http://localhost:3000](http://localhost:3000) in your browser
 
 ## How It Works
 
-1. **Browser Creation**: When you click "Run Browser Automation", the API route creates a headless browser using the Kernel SDK
-2. **CDP Connection**: Connect to the Kernel browser via CDP (Chrome DevTools Protocol) using your preferred automation framework
-3. **Script Execution**: Your automation script navigates to any URL and performs actions
-4. **Cleanup**: The browser is automatically deleted after the script completes
+1. **Browser Creation**: Click "Create Browser" to provision a headful Kernel browser with live view capabilities
+2. **Live View**: See your browser running in real-time through the embedded live view iframe
+3. **Automation**: Enter any URL and click "Run Automation" to navigate to it using Playwright over CDP
+4. **Results**: View execution metrics and page information returned from your automation
 
 ## Code Structure
 
 ```
 app/
 ├── api/
-│   └── run-browser/
-│       └── route.ts          # API endpoint that runs the automation
-├── page.tsx                  # Main UI with button and results
-└── layout.tsx                # Root layout
+│   ├── create-browser/
+│   │   └── route.ts          # Creates a headful Kernel browser
+│   └── run-automation/
+│       └── route.ts          # Connects via CDP and runs automation
+├── page.tsx                  # Main UI with live view and controls
+├── layout.tsx                # Root layout
+└── globals.css               # Global styles
 
 components/
 └── ui/                       # shadcn/ui components
+    ├── button.tsx
+    ├── card.tsx
+    └── input.tsx
+
+lib/
+└── utils.ts                  # Utility functions
 ```
 
 ### Key Code Example
 
+**Step 1: Create Browser** (`app/api/create-browser/route.ts`)
+
 ```typescript
 import { Kernel } from "@onkernel/sdk";
-import { chromium } from "playwright-core";
 
 // Initialize Kernel client
 const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Create a browser
-const browser = await kernel.browsers.create({ stealth: true });
+// Create a headful browser with live view
+const browser = await kernel.browsers.create({
+  stealth: true,
+  headless: false,
+});
 
-// Connect Playwright via CDP
-const pwBrowser = await chromium.connectOverCDP(browser.cdp_ws_url);
+// Return browser details to client
+return {
+  sessionId: browser.session_id,
+  liveViewUrl: browser.browser_live_view_url,
+  cdpWsUrl: browser.cdp_ws_url,
+};
+```
 
-// Run your automation
-const page = await pwBrowser.newPage();
-await page.goto("https://onkernel.com");
+**Step 2: Run Automation** (`app/api/run-automation/route.ts`)
+
+```typescript
+import { chromium } from "playwright-core";
+
+// Connect Playwright to the Kernel browser via CDP
+const browser = await chromium.connectOverCDP(cdpWsUrl);
+
+// Get the default context and page
+const context = browser.contexts()[0];
+const page = context.pages()[0] || (await context.newPage());
+
+// Navigate and extract data
+await page.goto(url, { waitUntil: "domcontentloaded" });
 const title = await page.title();
 
-// Clean up
-await pwBrowser.close();
-await kernel.browsers.delete(browser.id);
+// Close Playwright connection (browser continues running)
+await browser.close();
+
+return { title, url };
 ```
 
 ## Deployment
@@ -148,10 +180,6 @@ Make sure to add this environment variable in your Vercel project settings:
 - [Kernel Documentation](https://docs.onkernel.com)
 - [Kernel API Reference](https://docs.onkernel.com/api-reference)
 - [Next.js Documentation](https://nextjs.org/docs)
-
-## License
-
-MIT
 
 ---
 
