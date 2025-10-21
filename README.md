@@ -8,8 +8,8 @@ A Next.js template demonstrating how to run browser automations in Vercel server
 
 This template shows how to:
 
-- Create headful cloud browsers with live view using the Kernel SDK
-- Connect automation frameworks (like Playwright) to Kernel browsers via CDP
+- Create cloud browsers with live view using the Kernel SDK
+- Connect automation frameworks to Kernel browsers via CDP
 - Run browser automations in Next.js API routes
 - Display live browser view and automation results in a modern Next.js UI
 
@@ -27,6 +27,7 @@ This template shows how to:
 ### Prerequisites
 
 - Node.js 18+
+- [Bun](https://bun.sh) (package manager)
 - [Bun](https://bun.sh) (package manager)
 - A Kernel account and API key
 - Vercel account (optional, for deployment)
@@ -58,7 +59,7 @@ This template shows how to:
    Create a `.env` file:
 
    ```bash
-   touch .env
+   touch .env.local
    ```
 
    Add your Kernel API key:
@@ -70,6 +71,7 @@ This template shows how to:
 5. **Run the development server**:
 
    ```bash
+   bun dev
    bun dev
    ```
 
