@@ -394,7 +394,7 @@ export default function HomePage() {
                     <div className="text-2xl font-bold">2.</div>
                     <h3 className="font-semibold">Connect via CDP</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use CDP to connect your favorite automation framework
+                      Use CDP to connect your [favorite automation framework](https://onkernel.com/docs/integrations/overview)
                     </p>
                   </div>
                 </CardContent>
