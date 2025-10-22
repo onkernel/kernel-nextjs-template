@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface BrowserSession {
   sessionId: string;
@@ -144,8 +145,7 @@ export default function HomePage() {
                 Browser Automations with Kernel
               </h2>
               <p className="text-lg text-muted-foreground text-balance">
-                See how fast Kernel browsers spin up, then watch live as
-                your automation navigates to any URL in the cloud.
+                See how fast Kernel browsers spin up, then watch live as your automation navigates to any URL in the cloud.
               </p>
             </div>
 
@@ -394,7 +394,7 @@ export default function HomePage() {
                     <div className="text-2xl font-bold">2.</div>
                     <h3 className="font-semibold">Connect via CDP</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use CDP to connect your [favorite automation framework](https://onkernel.com/docs/integrations/overview)
+                      Use CDP to connect <Link className="underline" href="https://onkernel.com/docs/integrations/overview">your favorite automation framework</Link>
                     </p>
                   </div>
                 </CardContent>
