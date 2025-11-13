@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Clock, Activity, Eye, EyeOff, Puzzle } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, Activity, Eye, EyeOff, Puzzle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
@@ -32,7 +32,8 @@ interface DualAutomationResult {
   browserA: MagnitudeAutomationResult;
   browserB: MagnitudeAutomationResult;
   timestamp: number;
-  taskDescription: string;
+  taskAction: string;
+  taskExtraction: string;
   targetWebsite: string;
   modelUsed: string;
 }
@@ -58,10 +59,12 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [deployUrl, setDeployUrl] = useState<string | null>(null);
   const [targetUrl, setTargetUrl] = useState("https://www.onkernel.com/docs/careers/intro");
-  const [taskDescription, setTaskDescription] = useState("Tell me what Kernel is looking for in a Customer Engineer.");
+  const [taskAction, setTaskAction] = useState("Navigate to the careers page and find information about Customer Engineer positions.");
+  const [taskExtraction, setTaskExtraction] = useState("Extract the key qualifications and responsibilities for the Customer Engineer role.");
   const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5-20250929");
   const [showBrowserA, setShowBrowserA] = useState(true);
   const [showBrowserB, setShowBrowserB] = useState(true);
+  const [expandedTaskInfo, setExpandedTaskInfo] = useState<Set<number>>(new Set());
 
   // Helper function to format execution time
   const formatExecutionTime = (ms: number): string => {
@@ -69,6 +72,19 @@ export default function HomePage() {
       return `${(ms / 1000).toFixed(2)}s`;
     }
     return `${ms}ms`;
+  };
+
+  // Toggle task info expansion
+  const toggleTaskInfo = (timestamp: number) => {
+    setExpandedTaskInfo((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(timestamp)) {
+        newSet.delete(timestamp);
+      } else {
+        newSet.add(timestamp);
+      }
+      return newSet;
+    });
   };
 
   // Load extensions on mount
@@ -160,7 +176,8 @@ export default function HomePage() {
           body: JSON.stringify({
             cdpWsUrl: browserSession.browserA.cdpWsUrl,
             url: targetUrl,
-            task: taskDescription,
+            taskAction: taskAction,
+            taskExtraction: taskExtraction,
             model: selectedModel,
           }),
         });
@@ -187,7 +204,8 @@ export default function HomePage() {
           body: JSON.stringify({
             cdpWsUrl: browserSession.browserB.cdpWsUrl,
             url: targetUrl,
-            task: taskDescription,
+            taskAction: taskAction,
+            taskExtraction: taskExtraction,
             model: selectedModel,
           }),
         });
@@ -213,7 +231,8 @@ export default function HomePage() {
         browserA: resultA,
         browserB: resultB,
         timestamp: Date.now(),
-        taskDescription: taskDescription,
+        taskAction: taskAction,
+        taskExtraction: taskExtraction,
         targetWebsite: targetUrl,
         modelUsed: selectedModel,
       };
@@ -598,7 +617,7 @@ export default function HomePage() {
 
                       <div className="space-y-2 text-left">
                         <label htmlFor="target-url" className="text-sm font-medium">
-                          Target Website
+                          1. Target Website
                         </label>
                         <Input
                           id="target-url"
@@ -611,20 +630,38 @@ export default function HomePage() {
                       </div>
 
                       <div className="space-y-2 text-left">
-                        <label htmlFor="task-description" className="text-sm font-medium">
-                          Task Description
+                        <label htmlFor="task-action" className="text-sm font-medium">
+                          2. Task Action
                         </label>
                         <textarea
-                          id="task-description"
-                          value={taskDescription}
-                          onChange={(e) => setTaskDescription(e.target.value)}
-                          placeholder="Go to the developer documentation and summarize the job opportunities available at Kernel"
+                          id="task-action"
+                          value={taskAction}
+                          onChange={(e) => setTaskAction(e.target.value)}
+                          placeholder="Navigate to the careers page and find information about Customer Engineer positions"
                           disabled={runningAutomation}
                           rows={3}
                           className="w-full px-3 py-2 border rounded-md bg-background resize-none"
                         />
                         <p className="text-xs text-muted-foreground">
                           Describe what you want the AI agent to do on both browsers
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 text-left">
+                        <label htmlFor="task-extraction" className="text-sm font-medium">
+                          3. Task Extraction
+                        </label>
+                        <textarea
+                          id="task-extraction"
+                          value={taskExtraction}
+                          onChange={(e) => setTaskExtraction(e.target.value)}
+                          placeholder="Extract the key qualifications and responsibilities for the role"
+                          disabled={runningAutomation}
+                          rows={3}
+                          className="w-full px-3 py-2 border rounded-md bg-background resize-none"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Describe what data the AI agent should extract after completing the action
                         </p>
                       </div>
 
@@ -682,24 +719,44 @@ export default function HomePage() {
                               </span>
                             </div>
 
-                            {/* Task Metadata */}
-                            <div className="space-y-2 text-sm border-b pb-3">
-                              <div>
-                                <span className="text-muted-foreground font-medium">Task Requested: </span>
-                                <span>{result.taskDescription}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground font-medium">Target Website: </span>
-                                <span className="text-primary">{result.targetWebsite}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground font-medium">Model Used: </span>
-                                <span>
-                                  {result.modelUsed === "claude-sonnet-4-5-20250929"
-                                    ? "Claude Sonnet 4.5 ($$)"
-                                    : "Claude Haiku 4.5 ($)"}
-                                </span>
-                              </div>
+                            {/* Task Metadata - Collapsible */}
+                            <div className="border-b pb-3">
+                              <button
+                                onClick={() => toggleTaskInfo(result.timestamp)}
+                                className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors w-full text-left"
+                              >
+                                {expandedTaskInfo.has(result.timestamp) ? (
+                                  <ChevronUp className="w-4 h-4" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4" />
+                                )}
+                                <span>Task Info</span>
+                              </button>
+
+                              {expandedTaskInfo.has(result.timestamp) && (
+                                <div className="space-y-2 text-sm mt-3">
+                                  <div>
+                                    <span className="text-muted-foreground font-medium">Target Website: </span>
+                                    <span className="text-primary">{result.targetWebsite}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground font-medium">Task Action: </span>
+                                    <span>{result.taskAction}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground font-medium">Task Extraction: </span>
+                                    <span>{result.taskExtraction}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground font-medium">Model Used: </span>
+                                    <span>
+                                      {result.modelUsed === "claude-sonnet-4-5-20250929"
+                                        ? "Claude Sonnet 4.5 ($$)"
+                                        : "Claude Haiku 4.5 ($)"}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* Side by Side Results */}

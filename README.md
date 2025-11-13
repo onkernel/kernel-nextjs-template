@@ -119,9 +119,14 @@ Blocks and removes all images and videos from loaded web pages. Useful for testi
    - **Browser A**: Baseline browser (stealth mode enabled)
    - **Browser B**: Same configuration + your selected Chrome extension
 3. **Live Views**: Watch both browsers side-by-side in real-time through embedded iframes
-4. **AI Automation**: Enter a target website and describe a task in natural language
-5. **Parallel Execution**: Magnitude agents run the same task on both browsers simultaneously using Claude Haiku 4.5
-6. **Compare Results**: View execution times and AI-generated summaries side-by-side to see the extension's impact
+4. **Configure Automation Task**: Enter automation details using three substeps:
+   - **1. Target Website**: The URL where the automation should start
+   - **2. Task Action**: What you want the AI agent to do (e.g., "Navigate to the careers page and find job listings")
+   - **3. Task Extraction**: What data to extract after completing the action (e.g., "Extract the job title and location for Customer Engineer positions")
+5. **Parallel Execution**: Magnitude agents run the same task on both browsers simultaneously using Claude Sonnet/Haiku 4.5
+   - The **Task Action** is passed to `agent.act()` to execute the browsing task
+   - The **Task Extraction** is passed to `agent.extract()` to extract structured data
+6. **Compare Results**: View execution times and extracted results side-by-side to see the extension's impact
 
 ## Code Structure
 

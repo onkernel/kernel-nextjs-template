@@ -18,7 +18,7 @@ function normalizeUrl(url: string): string {
 
 export async function POST(request: Request) {
   try {
-    const { cdpWsUrl, url, task, model } = await request.json();
+    const { cdpWsUrl, url, taskAction, taskExtraction, model } = await request.json();
 
     if (!cdpWsUrl) {
       return NextResponse.json(
@@ -37,9 +37,16 @@ export async function POST(request: Request) {
     // Normalize URL to ensure it has a protocol
     const normalizedUrl = normalizeUrl(url);
 
-    if (!task) {
+    if (!taskAction) {
       return NextResponse.json(
-        { error: "task is required" },
+        { error: "taskAction is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!taskExtraction) {
+      return NextResponse.json(
+        { error: "taskExtraction is required" },
         { status: 400 }
       );
     }
@@ -67,7 +74,7 @@ export async function POST(request: Request) {
     // Run automation on single browser
     console.log("Starting Magnitude agent...");
 
-    const result = await runMagnitudeAutomation(cdpWsUrl, normalizedUrl, task, anthropicApiKey, selectedModel);
+    const result = await runMagnitudeAutomation(cdpWsUrl, normalizedUrl, taskAction, taskExtraction, anthropicApiKey, selectedModel);
 
     return NextResponse.json(result);
   } catch (error) {
@@ -85,14 +92,15 @@ export async function POST(request: Request) {
 async function runMagnitudeAutomation(
   cdpWsUrl: string,
   startingUrl: string,
-  task: string,
+  taskAction: string,
+  taskExtraction: string,
   anthropicApiKey: string,
   model: string
 ) {
   const startTime = Date.now();
 
   try {
-    console.log(`Starting agent for URL: ${startingUrl}, Task: ${task}`);
+    console.log(`Starting agent for URL: ${startingUrl}, Task Action: ${taskAction}, Task Extraction: ${taskExtraction}`);
 
     // Initialize Magnitude agent
     const agent = await startBrowserAgent({
@@ -112,11 +120,11 @@ async function runMagnitudeAutomation(
     let result = "";
     try {
       await agent.nav(startingUrl);
-      await agent.act([task]);
+      await agent.act([taskAction]);
 
       // Extract structured output with result
       const extractedData = await agent.extract(
-        "Provide a structured response",
+        taskExtraction,
         z.object({
           result: z.string().describe("The direct answer or result of the task requested (raw data, values, or factual information)")
         })
