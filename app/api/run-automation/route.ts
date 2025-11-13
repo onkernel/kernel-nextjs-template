@@ -97,38 +97,32 @@ async function runMagnitudeAutomation(
 
     // Execute the user's natural language task
     let result = "";
-    let summary = "";
     try {
       await agent.nav(startingUrl);
       await agent.act([task]);
 
-      // Extract structured output with result and summary
+      // Extract structured output with result
       const extractedData = await agent.extract(
         "Provide a structured response",
         z.object({
-          result: z.string().describe("The direct answer or result of the task requested"),
-          summary: z.string().describe("A brief summary of the steps taken to complete the task")
+          result: z.string().describe("The direct answer or result of the task requested (raw data, values, or factual information)")
         })
       );
 
       result = extractedData.result;
-      summary = extractedData.summary;
     } catch (actError) {
       // If act fails, try to extract what was attempted
       try {
         const attemptData = await agent.extract(
           "Describe what you attempted",
           z.object({
-            result: z.string().describe("What you were trying to accomplish"),
-            summary: z.string().describe("What steps you attempted before encountering the issue")
+            result: z.string().describe("What you were trying to accomplish (raw data, values, or factual information)")
           })
         );
         result = attemptData.result;
-        summary = attemptData.summary;
       } catch {
-        // If extraction also fails, use empty strings
+        // If extraction also fails, use empty string
         result = "";
-        summary = "";
       }
 
       // Re-throw with context
@@ -144,7 +138,6 @@ async function runMagnitudeAutomation(
       success: true,
       executionTime,
       result,
-      summary,
     };
   } catch (error) {
     const executionTime = Date.now() - startTime;
@@ -154,7 +147,6 @@ async function runMagnitudeAutomation(
       success: false,
       executionTime,
       result: "",
-      summary: "",
       error: error instanceof Error ? error.message : String(error),
     };
   }

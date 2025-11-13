@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Clock, Activity, Eye, EyeOff } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, Activity, Eye, EyeOff, Puzzle } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
@@ -25,7 +25,6 @@ interface MagnitudeAutomationResult {
   success: boolean;
   executionTime: number;
   result: string;
-  summary: string;
   error?: string;
 }
 
@@ -55,8 +54,8 @@ export default function HomePage() {
   const [runningB, setRunningB] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deployUrl, setDeployUrl] = useState<string | null>(null);
-  const [targetUrl, setTargetUrl] = useState("https://news.ycombinator.com");
-  const [taskDescription, setTaskDescription] = useState("Click on the Jobs tab and relay which companies listed on the initial page are hiring Developer Relations type roles.");
+  const [targetUrl, setTargetUrl] = useState("https://www.onkernel.com/docs/careers/intro");
+  const [taskDescription, setTaskDescription] = useState("Tell me what Kernel is looking for in a Customer Engineer.");
   const [showBrowserA, setShowBrowserA] = useState(true);
   const [showBrowserB, setShowBrowserB] = useState(true);
 
@@ -143,8 +142,8 @@ export default function HomePage() {
     setCurrentResultB(null);
 
     // Store results as they come in
-    let resultA: AutomationResult | null = null;
-    let resultB: AutomationResult | null = null;
+    let resultA: MagnitudeAutomationResult | null = null;
+    let resultB: MagnitudeAutomationResult | null = null;
 
     // Run both automations and update results independently as they complete
     const runBrowserA = async () => {
@@ -249,14 +248,14 @@ export default function HomePage() {
           <div className="text-center space-y-3">
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <Activity className="w-5 h-5 text-primary" />
+                <Puzzle className="w-5 h-5 text-primary" />
               </div>
             </div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Chrome Extension Performance Testing
+              Test Extensions with Browser Automation
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Compare your Chrome extension&apos;s performance against a baseline browser with the same configuration (stealth mode enabled)
+              Compare browser automation with and without your Chrome extension to see how it enhances your automation capabilities
             </p>
           </div>
         </div>
@@ -275,7 +274,7 @@ export default function HomePage() {
                     <div className="space-y-4">
                       <div className="space-y-2 text-left">
                         <label htmlFor="extension-select" className="text-sm font-medium">
-                          Select Chrome Extension
+                          Load Chrome Extension
                         </label>
                         {loadingExtensions ? (
                           <div className="flex items-center gap-2 text-muted-foreground">
@@ -467,14 +466,6 @@ export default function HomePage() {
                                         {currentResultA.result}
                                       </p>
                                     </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground font-semibold">
-                                        Summary:
-                                      </span>
-                                      <p className="text-sm mt-1 text-muted-foreground">
-                                        {currentResultA.summary}
-                                      </p>
-                                    </div>
                                   </>
                                 ) : (
                                   <div>
@@ -569,14 +560,6 @@ export default function HomePage() {
                                         {currentResultB.result}
                                       </p>
                                     </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground font-semibold">
-                                        Summary:
-                                      </span>
-                                      <p className="text-sm mt-1 text-muted-foreground">
-                                        {currentResultB.summary}
-                                      </p>
-                                    </div>
                                   </>
                                 ) : (
                                   <div>
@@ -667,7 +650,7 @@ export default function HomePage() {
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
                               <span className="font-semibold">
-                                Run #{automationResults.length - index}
+                                Task #{automationResults.length - index}
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 {new Date(result.timestamp).toLocaleTimeString()}
@@ -707,14 +690,6 @@ export default function HomePage() {
                                       </span>
                                       <p className="text-sm mt-1">
                                         {result.browserA.result}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground font-semibold">
-                                        Summary:
-                                      </span>
-                                      <p className="text-sm mt-1 text-muted-foreground">
-                                        {result.browserA.summary}
                                       </p>
                                     </div>
                                   </>
@@ -763,14 +738,6 @@ export default function HomePage() {
                                       </span>
                                       <p className="text-sm mt-1">
                                         {result.browserB.result}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-muted-foreground font-semibold">
-                                        Summary:
-                                      </span>
-                                      <p className="text-sm mt-1 text-muted-foreground">
-                                        {result.browserB.summary}
                                       </p>
                                     </div>
                                   </>
