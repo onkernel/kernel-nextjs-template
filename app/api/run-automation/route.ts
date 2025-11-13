@@ -18,7 +18,7 @@ function normalizeUrl(url: string): string {
 
 export async function POST(request: Request) {
   try {
-    const { cdpWsUrl, url, task } = await request.json();
+    const { cdpWsUrl, url, task, model } = await request.json();
 
     if (!cdpWsUrl) {
       return NextResponse.json(
@@ -44,6 +44,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // Set model with fallback to Sonnet 4.5
+    const selectedModel = model || "claude-sonnet-4-5-20250929";
+
+    // Validate model is one of the allowed values
+    const allowedModels = ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"];
+    if (!allowedModels.includes(selectedModel)) {
+      return NextResponse.json(
+        { error: `Invalid model. Must be one of: ${allowedModels.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
     if (!anthropicApiKey) {
       return NextResponse.json(
@@ -55,7 +67,7 @@ export async function POST(request: Request) {
     // Run automation on single browser
     console.log("Starting Magnitude agent...");
 
-    const result = await runMagnitudeAutomation(cdpWsUrl, normalizedUrl, task, anthropicApiKey);
+    const result = await runMagnitudeAutomation(cdpWsUrl, normalizedUrl, task, anthropicApiKey, selectedModel);
 
     return NextResponse.json(result);
   } catch (error) {
@@ -74,7 +86,8 @@ async function runMagnitudeAutomation(
   cdpWsUrl: string,
   startingUrl: string,
   task: string,
-  anthropicApiKey: string
+  anthropicApiKey: string,
+  model: string
 ) {
   const startTime = Date.now();
 
@@ -89,7 +102,7 @@ async function runMagnitudeAutomation(
       llm: {
         provider: "anthropic",
         options: {
-          model: "claude-sonnet-4-5-20250929",
+          model: model,
           apiKey: anthropicApiKey,
         },
       },

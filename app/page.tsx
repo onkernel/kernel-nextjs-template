@@ -32,6 +32,9 @@ interface DualAutomationResult {
   browserA: MagnitudeAutomationResult;
   browserB: MagnitudeAutomationResult;
   timestamp: number;
+  taskDescription: string;
+  targetWebsite: string;
+  modelUsed: string;
 }
 
 interface Extension {
@@ -56,6 +59,7 @@ export default function HomePage() {
   const [deployUrl, setDeployUrl] = useState<string | null>(null);
   const [targetUrl, setTargetUrl] = useState("https://www.onkernel.com/docs/careers/intro");
   const [taskDescription, setTaskDescription] = useState("Tell me what Kernel is looking for in a Customer Engineer.");
+  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5-20250929");
   const [showBrowserA, setShowBrowserA] = useState(true);
   const [showBrowserB, setShowBrowserB] = useState(true);
 
@@ -157,6 +161,7 @@ export default function HomePage() {
             cdpWsUrl: browserSession.browserA.cdpWsUrl,
             url: targetUrl,
             task: taskDescription,
+            model: selectedModel,
           }),
         });
 
@@ -183,6 +188,7 @@ export default function HomePage() {
             cdpWsUrl: browserSession.browserB.cdpWsUrl,
             url: targetUrl,
             task: taskDescription,
+            model: selectedModel,
           }),
         });
 
@@ -207,6 +213,9 @@ export default function HomePage() {
         browserA: resultA,
         browserB: resultB,
         timestamp: Date.now(),
+        taskDescription: taskDescription,
+        targetWebsite: targetUrl,
+        modelUsed: selectedModel,
       };
       setAutomationResults((prev) => [result, ...prev]);
     }
@@ -619,6 +628,22 @@ export default function HomePage() {
                         </p>
                       </div>
 
+                      <div className="space-y-2 text-left">
+                        <label htmlFor="model-select" className="text-sm font-medium">
+                          AI Model
+                        </label>
+                        <select
+                          id="model-select"
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
+                          disabled={runningAutomation}
+                          className="w-full px-3 py-2 border rounded-md bg-background"
+                        >
+                          <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 ($$)</option>
+                          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 ($)</option>
+                        </select>
+                      </div>
+
                       <Button
                         size="lg"
                         onClick={runAutomation}
@@ -655,6 +680,26 @@ export default function HomePage() {
                               <span className="text-xs text-muted-foreground">
                                 {new Date(result.timestamp).toLocaleTimeString()}
                               </span>
+                            </div>
+
+                            {/* Task Metadata */}
+                            <div className="space-y-2 text-sm border-b pb-3">
+                              <div>
+                                <span className="text-muted-foreground font-medium">Task Requested: </span>
+                                <span>{result.taskDescription}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground font-medium">Target Website: </span>
+                                <span className="text-primary">{result.targetWebsite}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground font-medium">Model Used: </span>
+                                <span>
+                                  {result.modelUsed === "claude-sonnet-4-5-20250929"
+                                    ? "Claude Sonnet 4.5 ($$)"
+                                    : "Claude Haiku 4.5 ($)"}
+                                </span>
+                              </div>
                             </div>
 
                             {/* Side by Side Results */}
