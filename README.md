@@ -11,7 +11,6 @@ This application demonstrates how to:
 - Select and load Chrome extensions from your Kernel account
 - Create dual cloud browsers (one with extension, one without) with live views
 - Run AI-powered automation tasks using Magnitude and Claude
-- Compare performance and behavior side-by-side in real-time
 - Analyze the impact of Chrome extensions on browsing and automation tasks
 
 ## Tech Stack
@@ -20,7 +19,7 @@ This application demonstrates how to:
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
 - **Browser Infrastructure**: Kernel SDK
-- **AI Automation**: Magnitude + Claude Haiku 4.5
+- **AI Automation**: Magnitude + Claude Sonnet/Haiku 4.5
 - **Package Manager**: Bun
 - **Deployment**: Vercel
 
@@ -61,10 +60,10 @@ This application demonstrates how to:
 
 5. **Configure environment variables**:
 
-   Create a `.env.local` file:
+   Create a `.env` file:
 
    ```bash
-   touch .env.local
+   touch .env
    ```
 
    Add your API keys:
@@ -81,6 +80,37 @@ This application demonstrates how to:
    ```
 
 7. **Open** [http://localhost:3000](http://localhost:3000) in your browser
+
+## Example Chrome Extensions
+
+This repository includes two sample Chrome extensions in the [`/extension-examples`](extension-examples/) directory that you can use to test the demo:
+
+### 1. Kernel Mode
+**Location**: [`/extension-examples/kernel-mode`](extension-examples/kernel-mode/)
+
+Replaces all images and videos on web pages with Kernel logos. Great for testing visual content modification and DOM manipulation performance.
+
+### 2. Remove Webpage Media
+**Location**: [`/extension-examples/remove-webpage-media`](extension-examples/remove-webpage-media/)
+
+Blocks and removes all images and videos from loaded web pages. Useful for testing page load performance.
+
+### How to Use These Extensions
+
+1. **Login to Kernel CLI**:
+   ```bash
+   kernel login
+   ```
+
+2. **Upload to Kernel via CLI**:
+   ```bash
+   kernel extensions upload ./extension-examples/kernel-mode --name kernel-mode
+   ```
+
+3. **Test in the demo**:
+   - Start the development server
+   - Select your uploaded extension from the dropdown
+   - Create dual browsers and run automation tasks to see the extension's impact
 
 ## How It Works
 

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remove Webpage Media</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 300px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #8B0000 0%, #000000 100%);
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+      color: #FFD700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    h1 img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .setting {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .setting label {
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .stats-message {
+      font-size: 14px;
+      font-weight: 500;
+      color: #FFD700;
+    }
+
+    .stats-message.inactive {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .description {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <img src="icon48.png" alt="Media Remover Logo">
+    Remove Webpage Media
+  </h1>
+
+  <div class="setting">
+    <div>
+      <label for="blockImages">Block Images</label>
+      <div class="description">Hide all images on pages</div>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="blockImages" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="setting">
+    <div>
+      <label for="blockVideos">Block Videos</label>
+      <div class="description">Hide all videos on pages</div>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="blockVideos" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
