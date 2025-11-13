@@ -1,24 +1,26 @@
-# Kernel + Vercel Template
+# Chrome Extension Performance Testing
 
-A Next.js template demonstrating how to run browser automations in Vercel serverless functions, powered by Kernel.
+A Next.js application for testing and comparing Chrome extension performance using dual browser automation, powered by Kernel, Magnitude, and Vercel.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fkernel-nextjs-template&project-name=kernel-nextjs-template&repository-name=kernel-nextjs-template&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22kernel%22%2C%22protocol%22%3A%22other%22%7D%5D)
 
 ## Overview
 
-This template shows how to:
+This application demonstrates how to:
 
-- Create cloud browsers with live view using the Kernel SDK
-- Connect automation frameworks to Kernel browsers via CDP
-- Run browser automations in Next.js API routes
-- Display live browser view and automation results in a modern Next.js UI
+- Select and load Chrome extensions from your Kernel account
+- Create dual cloud browsers (one with extension, one without) with live views
+- Run AI-powered automation tasks using Magnitude and Claude
+- Compare performance and behavior side-by-side in real-time
+- Analyze the impact of Chrome extensions on browsing and automation tasks
 
 ## Tech Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
-- **Browser Automation**: Kernel SDK + Playwright
+- **Browser Infrastructure**: Kernel SDK
+- **AI Automation**: Magnitude + Claude Haiku 4.5
 - **Package Manager**: Bun
 - **Deployment**: Vercel
 
@@ -28,8 +30,9 @@ This template shows how to:
 
 - Node.js 18+
 - [Bun](https://bun.sh) (package manager)
-- [Bun](https://bun.sh) (package manager)
-- A Kernel account and API key
+- A Kernel account and API key ([Get one here](https://dashboard.onkernel.com))
+- An Anthropic API key ([Get one here](https://console.anthropic.com))
+- Chrome extensions uploaded to your Kernel account
 - Vercel account (optional, for deployment)
 
 ### Installation
@@ -47,42 +50,48 @@ This template shows how to:
    bun install
    ```
 
-3. **Set up Kernel**:
+3. **Set up API keys**:
 
-   Get your Kernel API key from one of these sources:
+   - **Kernel API key**: Get from [Kernel Dashboard](https://dashboard.onkernel.com) or install the [Kernel integration](https://vercel.com/integrations/kernel) from Vercel Marketplace
+   - **Anthropic API key**: Get from [Anthropic Console](https://console.anthropic.com)
 
-   - **Option 1 (Recommended)**: Install the [Kernel integration](https://vercel.com/integrations/kernel) from the Vercel Marketplace
-   - **Option 2**: Get your API key from [https://dashboard.onkernel.com](https://dashboard.onkernel.com)
+4. **Upload Chrome extensions**:
 
-4. **Configure environment variables**:
+   Upload your Chrome extension to Kernel following the [extension documentation](https://www.onkernel.com/docs/browsers/extensions)
 
-   Create a `.env` file:
+5. **Configure environment variables**:
+
+   Create a `.env.local` file:
 
    ```bash
    touch .env.local
    ```
 
-   Add your Kernel API key:
+   Add your API keys:
 
    ```
-   KERNEL_API_KEY=your_api_key_here
+   KERNEL_API_KEY=your_kernel_api_key_here
+   ANTHROPIC_API_KEY=your_anthropic_api_key_here
    ```
 
-5. **Run the development server**:
+6. **Run the development server**:
 
    ```bash
    bun dev
-   bun dev
    ```
 
-6. **Open** [http://localhost:3000](http://localhost:3000) in your browser
+7. **Open** [http://localhost:3000](http://localhost:3000) in your browser
 
 ## How It Works
 
-1. **Browser Creation**: Click "Create Browser" to provision a headful Kernel browser with live view capabilities
-2. **Live View**: See your browser running in real-time through the embedded live view iframe
-3. **Automation**: Enter any URL and click "Run Automation" to navigate to it using Playwright over CDP
-4. **Results**: View execution metrics and page information returned from your automation
+1. **Select Extension**: Choose a Chrome extension from your Kernel account via the dropdown
+2. **Create Dual Browsers**: Click "Create Browsers" to provision two identical Kernel browsers in parallel:
+   - **Browser A**: Baseline browser (stealth mode enabled)
+   - **Browser B**: Same configuration + your selected Chrome extension
+3. **Live Views**: Watch both browsers side-by-side in real-time through embedded iframes
+4. **AI Automation**: Enter a target website and describe a task in natural language
+5. **Parallel Execution**: Magnitude agents run the same task on both browsers simultaneously using Claude Haiku 4.5
+6. **Compare Results**: View execution times and AI-generated summaries side-by-side to see the extension's impact
 
 ## Code Structure
 
@@ -90,10 +99,12 @@ This template shows how to:
 app/
 ├── api/
 │   ├── create-browser/
-│   │   └── route.ts          # Creates a headful Kernel browser
+│   │   └── route.ts          # Creates dual Kernel browsers (with/without extension)
+│   ├── list-extensions/
+│   │   └── route.ts          # Fetches user's Chrome extensions from Kernel
 │   └── run-automation/
-│       └── route.ts          # Connects via CDP and runs automation
-├── page.tsx                  # Main UI with live view and controls
+│       └── route.ts          # Runs Magnitude AI agents on both browsers
+├── page.tsx                  # Main UI with dual live views and controls
 ├── layout.tsx                # Root layout
 └── globals.css               # Global styles
 
@@ -107,50 +118,74 @@ lib/
 └── utils.ts                  # Utility functions
 ```
 
-### Key Code Example
+### Key Code Examples
 
-**Step 1: Create Browser** (`app/api/create-browser/route.ts`)
+**Step 1: List Extensions** (`app/api/list-extensions/route.ts`)
 
 ```typescript
 import { Kernel } from "@onkernel/sdk";
 
-// Initialize Kernel client
 const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Create a headful browser with live view
-const browser = await kernel.browsers.create({
-  stealth: true,
-  headless: false,
-});
+// Fetch user's Chrome extensions
+const extensions = await kernel.extensions.list();
 
-// Return browser details to client
-return {
-  sessionId: browser.session_id,
-  liveViewUrl: browser.browser_live_view_url,
-  cdpWsUrl: browser.cdp_ws_url,
-};
+return extensions.map(ext => ({
+  id: ext.id,
+  name: ext.name,
+}));
 ```
 
-**Step 2: Run Automation** (`app/api/run-automation/route.ts`)
+**Step 2: Create Dual Browsers** (`app/api/create-browser/route.ts`)
 
 ```typescript
-import { chromium } from "playwright-core";
+import { Kernel } from "@onkernel/sdk";
 
-// Connect Playwright to the Kernel browser via CDP
-const browser = await chromium.connectOverCDP(cdpWsUrl);
+const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Get the default context and page
-const context = browser.contexts()[0];
-const page = context.pages()[0] || (await context.newPage());
+// Create both browsers in parallel
+const [browserA, browserB] = await Promise.all([
+  // Browser A: Standard browser
+  kernel.browsers.create({
+    stealth: true,
+    headless: false,
+  }),
+  // Browser B: With extension
+  kernel.browsers.create({
+    stealth: true,
+    headless: false,
+    extensions: [{ name: extensionName }],
+  }),
+]);
+```
 
-// Navigate and extract data
-await page.goto(url, { waitUntil: "domcontentloaded" });
-const title = await page.title();
+**Step 3: Run AI Automation** (`app/api/run-automation/route.ts`)
 
-// Close Playwright connection (browser continues running)
-await browser.close();
+```typescript
+import { startBrowserAgent } from "magnitude-core";
+import { z } from "zod";
 
-return { title, url };
+// Initialize Magnitude agent
+const agent = await startBrowserAgent({
+  url: startingUrl,
+  browser: { cdp: cdpWsUrl },
+  llm: {
+    provider: "anthropic",
+    options: {
+      model: "claude-haiku-4-5-20251001",
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    },
+  },
+});
+
+// Execute natural language task
+await agent.act([userTask]);
+
+// Extract results
+const output = await agent.extract(
+  "Summarize what you did and what you found",
+  z.string()
+);
 ```
 
 ## Deployment
@@ -163,26 +198,30 @@ return { title, url };
 
    - Go to [vercel.com](https://vercel.com)
    - Import your GitHub repository
-   - Add your `KERNEL_API_KEY` environment variable
+   - Add environment variables (see below)
    - Deploy!
 
 3. **Using Vercel Marketplace Integration**:
    - Install [Kernel from Vercel Marketplace](https://vercel.com/integrations/kernel)
-   - The integration will automatically add the API key to your project
+   - The integration will automatically add the Kernel API key to your project
+   - Manually add your Anthropic API key
    - Deploy your project
 
 ### Environment Variables
 
-Make sure to add this environment variable in your Vercel project settings:
+Make sure to add these environment variables in your Vercel project settings:
 
 - `KERNEL_API_KEY` - Your Kernel API key
+- `ANTHROPIC_API_KEY` - Your Anthropic API key for Magnitude/Claude
 
 ## Learn More
 
 - [Kernel Documentation](https://docs.onkernel.com)
-- [Kernel API Reference](https://docs.onkernel.com/api-reference)
+- [Kernel Extensions API](https://www.onkernel.com/docs/browsers/extensions)
+- [Magnitude Documentation](https://docs.magnitude.run)
+- [Magnitude + Kernel Integration](https://docs.magnitude.run/integrations/kernel)
 - [Next.js Documentation](https://nextjs.org/docs)
 
 ---
 
-Built with [Kernel](https://dashboard.onkernel.com) and [Vercel](https://vercel.com)
+Built with [Kernel](https://dashboard.onkernel.com), [Magnitude](https://docs.magnitude.run), and [Vercel](https://vercel.com)

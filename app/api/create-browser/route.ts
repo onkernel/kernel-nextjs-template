@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Kernel } from "@onkernel/sdk";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const apiKey = process.env.KERNEL_API_KEY;
 
@@ -17,27 +17,54 @@ export async function POST() {
       );
     }
 
-    const startTime = Date.now();
+    // Get extension ID from request body
+    const body = await request.json();
+    const extensionId = body.extensionId;
+    const extensionName = body.extensionName;
 
     // Initialize Kernel client
     const kernel = new Kernel({ apiKey });
 
-    // Create a headful, stealth browser
-    console.log("Creating Kernel browser...");
-    const browser = await kernel.browsers.create({
+    // Create browsers sequentially to get accurate individual spin-up times
+    console.log("Creating dual Kernel browsers...");
+
+    // Browser A first
+    const startTimeA = Date.now();
+    const browserA = await kernel.browsers.create({
       stealth: true,
       headless: false,
+      timeout_seconds: 120,
     });
-    console.log(`Browser created: ${browser.session_id}`);
+    const spinUpTimeA = Date.now() - startTimeA;
+    console.log(`Browser A created: ${browserA.session_id} (${spinUpTimeA}ms)`);
 
-    const spinUpTime = Date.now() - startTime;
+    // Browser B second
+    const startTimeB = Date.now();
+    const browserB = await kernel.browsers.create({
+      stealth: true,
+      headless: false,
+      timeout_seconds: 120,
+      extensions: extensionName ? [{ name: extensionName }] : [],
+    });
+    const spinUpTimeB = Date.now() - startTimeB;
+    console.log(`Browser B created: ${browserB.session_id} (${spinUpTimeB}ms)`);
 
     return NextResponse.json({
       success: true,
-      sessionId: browser.session_id,
-      liveViewUrl: browser.browser_live_view_url,
-      cdpWsUrl: browser.cdp_ws_url,
-      spinUpTime,
+      browserA: {
+        sessionId: browserA.session_id,
+        liveViewUrl: browserA.browser_live_view_url,
+        cdpWsUrl: browserA.cdp_ws_url,
+        spinUpTime: spinUpTimeA,
+      },
+      browserB: {
+        sessionId: browserB.session_id,
+        liveViewUrl: browserB.browser_live_view_url,
+        cdpWsUrl: browserB.cdp_ws_url,
+        spinUpTime: spinUpTimeB,
+      },
+      extensionId,
+      extensionName,
     });
   } catch (error) {
     console.error("Error creating browser:", error);
