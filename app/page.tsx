@@ -510,7 +510,7 @@ export default function HomePage() {
                     <div className="text-2xl font-bold">1.</div>
                     <h3 className="font-semibold">Create Browser</h3>
                     <p className="text-sm text-muted-foreground">
-                      Kernel provisions a cloud browser instance in seconds
+                      Kernel provisions a cloud browser instance in 300ms
                     </p>
                   </div>
                 </CardContent>
@@ -521,7 +521,7 @@ export default function HomePage() {
                     <div className="text-2xl font-bold">2.</div>
                     <h3 className="font-semibold">Describe Your Task</h3>
                     <p className="text-sm text-muted-foreground">
-                      Tell the AI agent what you want to do in natural language
+                      Tell the browser agent what you want to do in natural language
                     </p>
                   </div>
                 </CardContent>
@@ -554,8 +554,8 @@ export default function HomePage() {
               rel="noopener noreferrer"
             >
               Kernel
-            </a>{" "}
-            and{" "}
+            </a>
+            ,{" "}
             <a
               href="https://vercel.com"
               className="underline"
@@ -563,6 +563,15 @@ export default function HomePage() {
               rel="noopener noreferrer"
             >
               Vercel
+            </a>
+            , and{" "}
+            <a
+              href="https://openai.com"
+              className="underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GPT-5
             </a>
           </p>
         </div>
