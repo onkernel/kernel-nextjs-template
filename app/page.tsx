@@ -9,10 +9,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, Monitor, Terminal, Zap } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Header } from "@/components/Header";
 
 interface BrowserSession {
   sessionId: string;
@@ -170,52 +171,40 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative flex flex-col">
+      {/* Radial Glow Effect */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+      </div>
+
       {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-4">
-            <Image
-              src="/kernel-logo.svg"
-              alt="Kernel"
-              width={120}
-              height={23}
-              priority
-            />
-            <span className="text-xl text-muted-foreground">X</span>
-            <Image
-              src="/vercel-logo.svg"
-              alt="Vercel"
-              width={120}
-              height={23}
-              priority
-            />
-          </div>
-        </div>
-      </header>
+      <div className="relative z-10">
+        <Header />
+      </div>
 
       {/* Main Content */}
-      <section className="py-12 lg:py-20">
+      <section className="py-12 lg:py-20 relative z-10 flex-grow">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="space-y-8 text-center">
             {/* Hero Section */}
             <div className="space-y-4">
-              <h2 className="text-4xl lg:text-5xl font-bold text-balance">
+              <h2 className="text-6xl lg:text-7xl font-bold text-balance bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
                 AI-Powered Browser Automation with Kernel
               </h2>
-              <p className="text-lg text-muted-foreground text-balance">
+              <p className="text-lg text-gray-400 text-balance">
                 Describe what you want to do in natural language, and watch as an AI agent writes and executes Playwright code in real-time.
               </p>
             </div>
 
             {/* Step 1: Create Browser */}
             {!browserSession && (
-              <div>
+              <div className="space-y-2">
                 <Button
+                  variant="vercel"
                   size="lg"
                   onClick={createBrowser}
                   disabled={creatingBrowser}
-                  className="text-lg px-8 py-6"
+                  className="text-base px-8 py-6 h-auto font-semibold"
                 >
                   {creatingBrowser ? (
                     <>
@@ -223,9 +212,13 @@ export default function HomePage() {
                       Creating Browser...
                     </>
                   ) : (
-                    "Create Browser"
+                    <>
+                      Create Browser
+                      <span className="ml-1">→</span>
+                    </>
                   )}
                 </Button>
+                <p className="text-xs text-gray-600">Click to create cloud browser</p>
               </div>
             )}
 
@@ -502,37 +495,57 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* Info Cards */}
-            <div className="grid md:grid-cols-3 gap-6 pt-8">
-              <Card>
-                <CardContent>
+            {/* Info Cards - Bento Grid */}
+            <div className="grid md:grid-cols-3 gap-6 pt-8 md:items-center">
+              {/* Card 1 - Create Browser */}
+              <Card className="bg-[#0A0A0A] border-white/5 relative overflow-hidden">
+                <CardContent className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
+                      <Monitor className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <div className="text-7xl font-bold text-white/10">01</div>
+                  </div>
                   <div className="space-y-2">
-                    <div className="text-2xl font-bold">1.</div>
-                    <h3 className="font-semibold">Create Browser</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Kernel provisions a cloud browser instance in 300ms
+                    <h3 className="font-semibold text-white">Create Browser</h3>
+                    <p className="text-sm text-gray-500">
+                      Kernel provisions a secure cloud browser instance in &lt;300ms. Fully isolated and scalable.
                     </p>
                   </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent>
+
+              {/* Card 2 - Describe Your Task (Middle - Purple Accent) */}
+              <Card className="bg-[#0A0A0A] border-white/5 relative overflow-hidden md:h-[17rem]">
+                <CardContent className="relative h-full py-8">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-2.5 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                      <Terminal className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div className="text-7xl font-bold text-purple-500/10">02</div>
+                  </div>
                   <div className="space-y-2">
-                    <div className="text-2xl font-bold">2.</div>
-                    <h3 className="font-semibold">Describe Your Task</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Tell the browser agent what you want to do in natural language
+                    <h3 className="font-semibold text-white">Describe Your Task</h3>
+                    <p className="text-sm text-gray-400">
+                      Tell the browser agent what you want to do in natural language. Turn intent to action with AI SDK.
                     </p>
                   </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent>
+
+              {/* Card 3 - Watch It Execute */}
+              <Card className="bg-[#0A0A0A] border-white/5 relative overflow-hidden">
+                <CardContent className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
+                      <Zap className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <div className="text-7xl font-bold text-white/10">03</div>
+                  </div>
                   <div className="space-y-2">
-                    <div className="text-2xl font-bold">3.</div>
-                    <h3 className="font-semibold">Watch It Execute</h3>
-                    <p className="text-sm text-muted-foreground">
-                      AI generates and runs Playwright code in real-time
+                    <h3 className="font-semibold text-white">Watch it Execute</h3>
+                    <p className="text-sm text-gray-500">
+                      Agent generates and then executes code in real time using Kernel's Playwright Execution API.
                     </p>
                   </div>
                 </CardContent>
@@ -543,13 +556,13 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 mt-auto">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm">
+      <footer className="pb-8 mt-auto">
+        <div className="container mx-auto px-4 text-center text-gray-600 text-xs">
           <p>
             Powered by{" "}
             <a
               href="https://onkernel.com"
-              className="underline"
+              className="font-medium hover:text-gray-400 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -558,7 +571,7 @@ export default function HomePage() {
             ,{" "}
             <a
               href="https://vercel.com"
-              className="underline"
+              className="font-medium hover:text-gray-400 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -567,7 +580,7 @@ export default function HomePage() {
             , and{" "}
             <a
               href="https://openai.com"
-              className="underline"
+              className="font-medium hover:text-gray-400 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
