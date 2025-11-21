@@ -2,8 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,19 +21,27 @@ interface BrowserSession {
   spinUpTime: number;
 }
 
+interface ExecutedCode {
+  code: string;
+  success: boolean;
+  result?: any;
+  error?: string;
+}
+
 interface AutomationResult {
   success: boolean;
-  title?: string;
-  url?: string;
-  executionTime?: number;
+  response?: string;
+  executedCodes?: ExecutedCode[];
+  stepCount?: number;
   timestamp: number;
   error?: string;
-  details?: string;
+  task?: string;
 }
 
 export default function HomePage() {
   const [creatingBrowser, setCreatingBrowser] = useState(false);
   const [runningAutomation, setRunningAutomation] = useState(false);
+  const [closingBrowser, setClosingBrowser] = useState(false);
   const [browserSession, setBrowserSession] = useState<BrowserSession | null>(
     null
   );
@@ -36,7 +50,7 @@ export default function HomePage() {
   >([]);
   const [error, setError] = useState<string | null>(null);
   const [deployUrl, setDeployUrl] = useState<string | null>(null);
-  const [targetUrl, setTargetUrl] = useState("https://onkernel.com");
+  const [task, setTask] = useState("Navigate to https://onkernel.com and get the page title");
 
   const createBrowser = async () => {
     setCreatingBrowser(true);
@@ -73,40 +87,85 @@ export default function HomePage() {
   };
 
   const runAutomation = async () => {
-    if (!browserSession) return;
+    if (!browserSession || !task.trim()) return;
 
     setRunningAutomation(true);
 
     try {
-      const response = await fetch("/api/run-automation", {
+      const response = await fetch("/api/agent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          cdpWsUrl: browserSession.cdpWsUrl,
-          url: targetUrl,
+          sessionId: browserSession.sessionId,
+          task: task.trim(),
         }),
       });
 
       const data = await response.json();
 
       const result: AutomationResult = {
-        ...data,
+        success: data.success,
+        response: data.response,
+        executedCodes: data.executedCodes,
+        stepCount: data.stepCount,
+        error: data.error,
+        task: task.trim(),
         timestamp: Date.now(),
       };
 
       setAutomationResults((prev) => [result, ...prev]);
+
+      // Clear the task input after successful execution
+      if (data.success) {
+        setTask("");
+      }
     } catch (err) {
       const result: AutomationResult = {
         success: false,
-        error: "Failed to run automation",
-        details: err instanceof Error ? err.message : String(err),
+        error: "Failed to run AI agent",
+        task: task.trim(),
         timestamp: Date.now(),
       };
       setAutomationResults((prev) => [result, ...prev]);
     } finally {
       setRunningAutomation(false);
+    }
+  };
+
+  const closeBrowser = async () => {
+    if (!browserSession) return;
+
+    setClosingBrowser(true);
+
+    try {
+      const response = await fetch("/api/delete-browser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: browserSession.sessionId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Clear browser session and reset state
+        setBrowserSession(null);
+        setAutomationResults([]);
+        setTask("Navigate to https://onkernel.com and get the page title");
+      } else {
+        setError(data.error || "Failed to close browser");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to close browser"
+      );
+    } finally {
+      setClosingBrowser(false);
     }
   };
 
@@ -142,10 +201,10 @@ export default function HomePage() {
             {/* Hero Section */}
             <div className="space-y-4">
               <h2 className="text-4xl lg:text-5xl font-bold text-balance">
-                Browser Automations with Kernel
+                AI-Powered Browser Automation with Kernel
               </h2>
               <p className="text-lg text-muted-foreground text-balance">
-                See how fast Kernel browsers spin up, then watch live as your automation navigates to any URL in the cloud.
+                Describe what you want to do in natural language, and watch as an AI agent writes and executes Playwright code in real-time.
               </p>
             </div>
 
@@ -210,11 +269,28 @@ export default function HomePage() {
                 <Card>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-green-600" />
-                        <span className="font-semibold">Browser Live View</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-green-600" />
+                          <span className="font-semibold">Browser Live View</span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={closeBrowser}
+                          disabled={closingBrowser || runningAutomation}
+                        >
+                          {closingBrowser ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Closing...
+                            </>
+                          ) : (
+                            "Close Browser"
+                          )}
+                        </Button>
                       </div>
-                      <div className="rounded-lg overflow-hidden border bg-black aspect-video">
+                      <div className="rounded-lg overflow-hidden border bg-black h-[500px]">
                         <iframe
                           src={browserSession.liveViewUrl}
                           className="w-full h-full"
@@ -241,39 +317,48 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
 
-                {/* Step 2: Run Automation */}
+                {/* Step 2: Run AI Agent */}
                 <Card>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="space-y-2 text-left">
                         <label
-                          htmlFor="target-url"
+                          htmlFor="task-input"
                           className="text-sm font-medium"
                         >
-                          Target URL
+                          Describe what you want the browser to do
                         </label>
-                        <Input
-                          id="target-url"
-                          type="url"
-                          value={targetUrl}
-                          onChange={(e) => setTargetUrl(e.target.value)}
-                          placeholder="https://onkernel.com"
+                        <Textarea
+                          id="task-input"
+                          value={task}
+                          onChange={(e) => setTask(e.target.value)}
+                          placeholder="Navigate to https://onkernel.com and click the Docs link"
                           disabled={runningAutomation}
+                          className="min-h-[100px] resize-none"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                              e.preventDefault();
+                              runAutomation();
+                            }
+                          }}
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Press Cmd/Ctrl + Enter to run
+                        </p>
                       </div>
                       <Button
                         size="lg"
                         onClick={runAutomation}
-                        disabled={runningAutomation}
+                        disabled={runningAutomation || !task.trim()}
                         className="w-full text-lg py-6"
                       >
                         {runningAutomation ? (
                           <>
                             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            Running Automation...
+                            AI Agent Running...
                           </>
                         ) : (
-                          "Run Automation"
+                          "Run AI Agent"
                         )}
                       </Button>
                     </div>
@@ -284,7 +369,7 @@ export default function HomePage() {
                 {automationResults.length > 0 && (
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-left">
-                      Automation Results
+                      Agent Results
                     </h3>
                     {automationResults.map((result, index) => (
                       <Card key={result.timestamp} className="text-left">
@@ -314,35 +399,87 @@ export default function HomePage() {
                               </span>
                             </div>
 
+                            {/* Task Description */}
+                            {result.task && (
+                              <div className="p-3 bg-muted rounded-md">
+                                <p className="text-sm text-muted-foreground mb-1">
+                                  Task:
+                                </p>
+                                <p className="text-sm">{result.task}</p>
+                              </div>
+                            )}
+
                             {result.success ? (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                  <Clock className="w-4 h-4 text-muted-foreground" />
+                              <div className="space-y-3">
+                                {/* Agent Response */}
+                                {result.response && (
                                   <div>
-                                    <span className="text-sm text-muted-foreground">
-                                      Execution Time:
-                                    </span>
-                                    <p className="font-mono text-lg font-bold">
-                                      {result.executionTime}ms
+                                    <p className="text-sm text-muted-foreground mb-1">
+                                      Response:
                                     </p>
+                                    <p className="text-sm">{result.response}</p>
                                   </div>
-                                </div>
-                                <div>
-                                  <span className="text-sm text-muted-foreground">
-                                    URL:
-                                  </span>
-                                  <p className="font-mono text-sm">
-                                    {result.url}
-                                  </p>
-                                </div>
-                                <div>
-                                  <span className="text-sm text-muted-foreground">
-                                    Page Title:
-                                  </span>
-                                  <p className="font-mono text-sm">
-                                    {result.title}
-                                  </p>
-                                </div>
+                                )}
+
+                                {/* Step Count */}
+                                {result.stepCount !== undefined && (
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="secondary">
+                                      {result.stepCount} steps
+                                    </Badge>
+                                  </div>
+                                )}
+
+                                {/* Executed Code Collapsible */}
+                                {result.executedCodes && result.executedCodes.length > 0 && (
+                                  <Collapsible>
+                                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:underline">
+                                      <ChevronDown className="w-4 h-4" />
+                                      View Generated Playwright Code ({result.executedCodes.length} {result.executedCodes.length === 1 ? 'execution' : 'executions'})
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent className="mt-3 space-y-3">
+                                      {result.executedCodes.map((code, codeIndex) => (
+                                        <div key={codeIndex} className="space-y-2">
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant={code.success ? "default" : "destructive"}>
+                                              Execution {codeIndex + 1}
+                                            </Badge>
+                                            {code.success ? (
+                                              <CheckCircle2 className="w-3 h-3 text-green-600" />
+                                            ) : (
+                                              <XCircle className="w-3 h-3 text-red-600" />
+                                            )}
+                                          </div>
+                                          <pre className="p-3 bg-muted rounded-md overflow-x-auto text-xs font-mono">
+                                            {code.code}
+                                          </pre>
+                                          {code.result !== undefined && (
+                                            <div>
+                                              <p className="text-xs text-muted-foreground mb-1">
+                                                Result:
+                                              </p>
+                                              <pre className="p-2 bg-muted rounded-md overflow-x-auto text-xs font-mono">
+                                                {typeof code.result === 'object'
+                                                  ? JSON.stringify(code.result, null, 2)
+                                                  : String(code.result)}
+                                              </pre>
+                                            </div>
+                                          )}
+                                          {code.error && (
+                                            <div>
+                                              <p className="text-xs text-muted-foreground mb-1">
+                                                Error:
+                                              </p>
+                                              <p className="text-xs text-red-600 font-mono">
+                                                {code.error}
+                                              </p>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </CollapsibleContent>
+                                  </Collapsible>
+                                )}
                               </div>
                             ) : (
                               <div className="space-y-2">
@@ -354,16 +491,6 @@ export default function HomePage() {
                                     {result.error}
                                   </p>
                                 </div>
-                                {result.details && (
-                                  <div>
-                                    <span className="text-sm text-muted-foreground">
-                                      Details:
-                                    </span>
-                                    <p className="font-mono text-sm text-muted-foreground">
-                                      {result.details}
-                                    </p>
-                                  </div>
-                                )}
                               </div>
                             )}
                           </div>
@@ -383,7 +510,7 @@ export default function HomePage() {
                     <div className="text-2xl font-bold">1.</div>
                     <h3 className="font-semibold">Create Browser</h3>
                     <p className="text-sm text-muted-foreground">
-                      Kernel provisions a cloud browser instance
+                      Kernel provisions a cloud browser instance in seconds
                     </p>
                   </div>
                 </CardContent>
@@ -392,9 +519,9 @@ export default function HomePage() {
                 <CardContent>
                   <div className="space-y-2">
                     <div className="text-2xl font-bold">2.</div>
-                    <h3 className="font-semibold">Connect via CDP</h3>
+                    <h3 className="font-semibold">Describe Your Task</h3>
                     <p className="text-sm text-muted-foreground">
-                      Use CDP to connect <Link className="underline" href="https://onkernel.com/docs/integrations/overview">your favorite automation framework</Link>
+                      Tell the AI agent what you want to do in natural language
                     </p>
                   </div>
                 </CardContent>
@@ -403,9 +530,9 @@ export default function HomePage() {
                 <CardContent>
                   <div className="space-y-2">
                     <div className="text-2xl font-bold">3.</div>
-                    <h3 className="font-semibold">Run Script</h3>
+                    <h3 className="font-semibold">Watch It Execute</h3>
                     <p className="text-sm text-muted-foreground">
-                      Execute your automation and get results
+                      AI generates and runs Playwright code in real-time
                     </p>
                   </div>
                 </CardContent>
