@@ -9,11 +9,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, Monitor, Terminal, Zap } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, Monitor, Terminal, Zap, ListTree } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/Header";
+import { StepsOverlay } from "@/components/StepsOverlay";
 
 interface BrowserSession {
   sessionId: string;
@@ -29,10 +30,27 @@ interface ExecutedCode {
   error?: string;
 }
 
+interface StepContentItem {
+  type: "tool-call" | "tool-result" | "text";
+  toolCallId?: string;
+  toolName?: string;
+  code?: string;
+  result?: any;
+  success?: boolean;
+  text?: string;
+}
+
+interface DetailedStep {
+  stepNumber: number;
+  finishReason: string | null;
+  content: StepContentItem[];
+}
+
 interface AutomationResult {
   success: boolean;
   response?: string;
   executedCodes?: ExecutedCode[];
+  detailedSteps?: DetailedStep[];
   stepCount?: number;
   timestamp: number;
   error?: string;
@@ -51,7 +69,8 @@ export default function HomePage() {
   >([]);
   const [error, setError] = useState<string | null>(null);
   const [deployUrl, setDeployUrl] = useState<string | null>(null);
-  const [task, setTask] = useState("Navigate to https://onkernel.com and get the page title");
+  const [task, setTask] = useState("Go to https://news.ycombinator.com/ and get the first article title");
+  const [stepsOverlayResult, setStepsOverlayResult] = useState<AutomationResult | null>(null);
 
   const createBrowser = async () => {
     setCreatingBrowser(true);
@@ -110,6 +129,7 @@ export default function HomePage() {
         success: data.success,
         response: data.response,
         executedCodes: data.executedCodes,
+        detailedSteps: data.detailedSteps,
         stepCount: data.stepCount,
         error: data.error,
         task: task.trim(),
@@ -157,7 +177,7 @@ export default function HomePage() {
         // Clear browser session and reset state
         setBrowserSession(null);
         setAutomationResults([]);
-        setTask("Navigate to https://onkernel.com and get the page title");
+        setTask("Go to https://news.ycombinator.com/ and get the first article title");
       } else {
         setError(data.error || "Failed to close browser");
       }
@@ -325,7 +345,7 @@ export default function HomePage() {
                           id="task-input"
                           value={task}
                           onChange={(e) => setTask(e.target.value)}
-                          placeholder="Navigate to https://onkernel.com and click the Docs link"
+                          placeholder="Go to https://news.ycombinator.com/ and get the first article title"
                           disabled={runningAutomation}
                           className="min-h-[100px] resize-none"
                           onKeyDown={(e) => {
@@ -414,12 +434,23 @@ export default function HomePage() {
                                   </div>
                                 )}
 
-                                {/* Step Count */}
+                                {/* Step Count and View Steps Button */}
                                 {result.stepCount !== undefined && (
                                   <div className="flex items-center gap-2">
                                     <Badge variant="secondary">
                                       {result.stepCount} steps
                                     </Badge>
+                                    {result.detailedSteps && result.detailedSteps.length > 0 && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setStepsOverlayResult(result)}
+                                        className="ml-2"
+                                      >
+                                        <ListTree className="w-4 h-4 mr-1" />
+                                        View Steps
+                                      </Button>
+                                    )}
                                   </div>
                                 )}
 
@@ -589,6 +620,16 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+
+      {/* Steps Overlay */}
+      {stepsOverlayResult && (
+        <StepsOverlay
+          open={!!stepsOverlayResult}
+          onOpenChange={(open) => !open && setStepsOverlayResult(null)}
+          steps={stepsOverlayResult.detailedSteps || []}
+          task={stepsOverlayResult.task || ""}
+        />
+      )}
     </div>
   );
 }
