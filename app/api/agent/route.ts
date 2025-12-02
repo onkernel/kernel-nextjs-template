@@ -46,7 +46,21 @@ export async function POST(req: Request) {
         }),
       },
       stopWhen: stepCountIs(20),
-      system: `You are a browser automation expert. You help users execute tasks in their browser using Playwright. If no specific page is mentioned or can be inferred, you should start by getting the html content and URL of the current page. Don't ask questions to the user.`,
+      system: `You are a browser automation expert with access to a Playwright execution tool.
+
+Available tools:
+- playwright_execute: Executes JavaScript/Playwright code in the browser. Has access to 'page', 'context', and 'browser' objects. Returns the result of your code.
+
+When given a task:
+1. If no URL is provided, FIRST get the current page context:
+   return { url: page.url(), title: await page.title() }
+2. If a URL is provided, navigate to it using page.goto()
+3. Use appropriate selectors (page.locator, page.getByRole, etc.) to interact with elements
+4. Always return the requested data from your code execution
+
+Important: Write concise code that solves one atomic step at a time. Break complex tasks into small, focused executions rather than writing long scripts.
+
+Execute tasks autonomously without asking clarifying questions. Make reasonable assumptions and proceed.`,
     });
 
     // Execute the agent with the user's task
@@ -75,8 +89,9 @@ export async function POST(req: Request) {
             type: "tool-result" as const,
             toolCallId: item.toolCallId,
             toolName: item.toolName,
-            result: item.result,
+            result: item.result?.result,
             success: item.result?.success ?? true,
+            error: item.result?.error,
           };
         } else if (item.type === "text") {
           return {

@@ -4,12 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Loader2, CheckCircle2, XCircle, Clock, ChevronDown, Monitor, Terminal, Zap, ListTree } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, Monitor, Terminal, Zap, ListTree } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -177,7 +172,7 @@ export default function HomePage() {
         // Clear browser session and reset state
         setBrowserSession(null);
         setAutomationResults([]);
-        setTask("Go to https://news.ycombinator.com/ and get the first article title");
+        setTask("Go to https://news.ycombinator.com/ and extract the first article title");
       } else {
         setError(data.error || "Failed to close browser");
       }
@@ -345,7 +340,7 @@ export default function HomePage() {
                           id="task-input"
                           value={task}
                           onChange={(e) => setTask(e.target.value)}
-                          placeholder="Go to https://news.ycombinator.com/ and get the first article title"
+                          placeholder="Go to https://news.ycombinator.com/ and extract the first article title"
                           disabled={runningAutomation}
                           className="min-h-[100px] resize-none"
                           onKeyDown={(e) => {
@@ -454,56 +449,6 @@ export default function HomePage() {
                                   </div>
                                 )}
 
-                                {/* Executed Code Collapsible */}
-                                {result.executedCodes && result.executedCodes.length > 0 && (
-                                  <Collapsible>
-                                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium hover:underline">
-                                      <ChevronDown className="w-4 h-4" />
-                                      View Generated Playwright Code ({result.executedCodes.length} {result.executedCodes.length === 1 ? 'execution' : 'executions'})
-                                    </CollapsibleTrigger>
-                                    <CollapsibleContent className="mt-3 space-y-3">
-                                      {result.executedCodes.map((code, codeIndex) => (
-                                        <div key={codeIndex} className="space-y-2">
-                                          <div className="flex items-center gap-2">
-                                            <Badge variant={code.success ? "default" : "destructive"}>
-                                              Execution {codeIndex + 1}
-                                            </Badge>
-                                            {code.success ? (
-                                              <CheckCircle2 className="w-3 h-3 text-green-600" />
-                                            ) : (
-                                              <XCircle className="w-3 h-3 text-red-600" />
-                                            )}
-                                          </div>
-                                          <pre className="p-3 bg-muted rounded-md overflow-x-auto text-xs font-mono">
-                                            {code.code}
-                                          </pre>
-                                          {code.result !== undefined && (
-                                            <div>
-                                              <p className="text-xs text-muted-foreground mb-1">
-                                                Result:
-                                              </p>
-                                              <pre className="p-2 bg-muted rounded-md overflow-x-auto text-xs font-mono">
-                                                {typeof code.result === 'object'
-                                                  ? JSON.stringify(code.result, null, 2)
-                                                  : String(code.result)}
-                                              </pre>
-                                            </div>
-                                          )}
-                                          {code.error && (
-                                            <div>
-                                              <p className="text-xs text-muted-foreground mb-1">
-                                                Error:
-                                              </p>
-                                              <p className="text-xs text-red-600 font-mono">
-                                                {code.error}
-                                              </p>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </CollapsibleContent>
-                                  </Collapsible>
-                                )}
                               </div>
                             ) : (
                               <div className="space-y-2">

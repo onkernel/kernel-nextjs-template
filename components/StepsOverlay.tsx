@@ -19,7 +19,6 @@ import {
   ChevronDown,
   Code2,
   MessageSquare,
-  Play,
   Terminal,
 } from "lucide-react";
 
@@ -187,55 +186,6 @@ function StepCard({ step, isLast }: { step: DetailedStep; isLast: boolean }) {
                 </Collapsible>
               )}
 
-              {/* Execution Result Section */}
-              {execution.toolResult && (
-                <Collapsible defaultOpen>
-                  <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition-colors w-full">
-                    <ChevronDown className="w-4 h-4 transition-transform duration-200" />
-                    <Play className="w-4 h-4 text-green-400" />
-                    <span>Execution Result</span>
-                    {execution.toolResult.success !== false ? (
-                      <Badge
-                        variant="outline"
-                        className="border-green-500/30 text-green-400 text-xs ml-auto"
-                      >
-                        Success
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="border-red-500/30 text-red-400 text-xs ml-auto"
-                      >
-                        Failed
-                      </Badge>
-                    )}
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2">
-                    <div
-                      className={`rounded-lg border overflow-hidden ${
-                        execution.toolResult.success !== false
-                          ? "bg-green-500/5 border-green-500/20"
-                          : "bg-red-500/5 border-red-500/20"
-                      }`}
-                    >
-                      {execution.toolResult.result !== undefined &&
-                        execution.toolResult.result !== null && (
-                          <div className="p-3">
-                            <div className="text-xs text-gray-400 mb-2 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />
-                              Return Value
-                            </div>
-                            <pre className="text-sm font-mono text-gray-200 bg-black/30 rounded p-2 overflow-x-auto whitespace-pre-wrap">
-                              {typeof execution.toolResult.result === "object"
-                                ? JSON.stringify(execution.toolResult.result, null, 2)
-                                : String(execution.toolResult.result)}
-                            </pre>
-                          </div>
-                        )}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
             </div>
           ))}
 
