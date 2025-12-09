@@ -22,15 +22,15 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return Response.json(
-        { error: "KERNEL_API_KEY not configured" },
-        { status: 500 }
+        { error: "KERNEL_API_KEY environment variable is not set" },
+        { status: 400 }
       );
     }
 
     if (!openaiKey) {
       return Response.json(
-        { error: "OPENAI_API_KEY not configured" },
-        { status: 500 }
+        { error: "OPENAI_API_KEY environment variable is not set" },
+        { status: 400 }
       );
     }
 
