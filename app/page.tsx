@@ -214,7 +214,7 @@ export default function HomePage() {
                 />
               </h2>
               <p className="text-lg text-gray-400 text-balance">
-                Describe what you want to do in natural language, and watch as an AI agent writes and executes Playwright code in a cloud browser.
+                Describe what you want to do in natural language, and watch as an AI agent executes browser automation in a serverless browser.
               </p>
             </div>
 
@@ -240,7 +240,7 @@ export default function HomePage() {
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-gray-600">Click to create cloud browser</p>
+                <p className="text-xs text-gray-600">Click to create serverless browser</p>
               </div>
             )}
 
@@ -492,7 +492,7 @@ export default function HomePage() {
                   <div className="space-y-2">
                     <h3 className="font-semibold text-white">Create Browser</h3>
                     <p className="text-sm text-gray-500">
-                      Kernel provisions a secure cloud browser instance in ~300ms. Fully isolated and scalable.
+                      Kernel provisions a serverless browser instance in ~300ms. Fully isolated and scalable.
                     </p>
                   </div>
                 </CardContent>
@@ -528,7 +528,7 @@ export default function HomePage() {
                   <div className="space-y-2">
                     <h3 className="font-semibold text-white">Watch it Execute</h3>
                     <p className="text-sm text-gray-500">
-                      Agent generates and then executes code in real time using Kernel's Playwright Execution API.
+                      Agent generates and executes automation code in real-time using Kernel's AI SDK-compatible tools.
                     </p>
                   </div>
                 </CardContent>

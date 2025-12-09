@@ -1,6 +1,6 @@
 # Kernel + Vercel Template
 
-A Next.js template demonstrating AI-powered browser automations with natural language, powered by Kernel's cloud browser APIs and the Vercel AI SDK.
+Next.js + Kernel template for running AI-powered browser automations with natural language on Vercel.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fkernel-nextjs-template&env=OPENAI_API_KEY&project-name=kernel-nextjs-template&repository-name=kernel-nextjs-template&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22kernel%22%2C%22protocol%22%3A%22other%22%7D%5D)
 
@@ -9,9 +9,9 @@ A Next.js template demonstrating AI-powered browser automations with natural lan
 
 This template shows how to:
 
-- Create cloud browsers with live view using the Kernel SDK
+- Create serverless browsers with live view using the Kernel SDK
 - Describe browser tasks in natural language
-- Use an AI agent to generate and execute Playwright code in Next.js API routes
+- Use an AI agent to execute browser automation code via AI SDK tools in Next.js API routes
 - Display live browser view and automation results in a modern Next.js UI
 
 ## Tech Stack
@@ -81,9 +81,9 @@ This template shows how to:
 
 ## How It Works
 
-1. **Create Browser**: Click "Create Browser" to provision a headful Kernel browser with live view capabilities
+1. **Create Browser**: Click "Create Browser" to provision a serverless Kernel browser with live view capabilities
 2. **Describe Your Task**: Enter what you want the browser to do in natural language (e.g., "Go to Hacker News and get the top article title")
-3. **Watch AI Execute**: The AI agent interprets your task, generates Playwright code using Kernel's ai-sdk Playwright Execution tool, and executes it in real-time
+3. **Watch AI Execute**: The AI agent interprets your task and uses Kernel's AI SDK-compatible browser automation tool to execute it in real-time
 4. **View Results**: See the agent's response, step count, and click "View Steps" to inspect the generated code and execution details
 
 ## Code Structure
@@ -92,9 +92,9 @@ This template shows how to:
 app/
 ├── api/
 │   ├── agent/
-│   │   └── route.ts          # AI agent endpoint with Playwright execution tool
+│   │   └── route.ts          # AI agent endpoint with browser automation tool
 │   ├── create-browser/
-│   │   └── route.ts          # Creates a headful Kernel browser
+│   │   └── route.ts          # Creates a serverless Kernel browser
 │   └── delete-browser/
 │       └── route.ts          # Closes browser session
 ├── page.tsx                  # Main UI with live view and controls
@@ -124,7 +124,7 @@ import { Kernel } from "@onkernel/sdk";
 // Initialize Kernel client
 const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Create a headful browser with live view
+// Create a serverless browser with live view
 const browser = await kernel.browsers.create({
   stealth: true,
   headless: false,
@@ -149,7 +149,7 @@ import { Experimental_Agent as Agent, stepCountIs } from "ai";
 // Initialize Kernel instance
 const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Initialize the AI agent with GPT-5.1 and the Vercel AI SDK-compatible playwrightExecuteTool tool
+// Initialize the AI agent with GPT-5.1 and Kernel's AI SDK-compatible browser automation tool
 const agent = new Agent({
   model: openai("gpt-5.1"),
   tools: {
