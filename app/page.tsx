@@ -203,11 +203,18 @@ export default function HomePage() {
           <div className="space-y-8 text-center">
             {/* Hero Section */}
             <div className="space-y-4">
-              <h2 className="text-6xl lg:text-7xl font-bold text-balance bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
-                AI-Powered Browser Automation with Kernel
+              <h2 className="text-6xl lg:text-7xl font-bold text-balance">
+                <span className="bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">AI-Powered Browser Automation with </span>
+                <Image
+                  src="/kernel-wordmark-accent.svg"
+                  alt="Kernel"
+                  width={836}
+                  height={160}
+                  className="inline-block h-[0.75em] w-auto align-baseline"
+                />
               </h2>
               <p className="text-lg text-gray-400 text-balance">
-                Describe what you want to do in natural language, and watch as an AI agent writes and executes Playwright code in real-time.
+                Describe what you want to do in natural language, and watch as an AI agent writes and executes Playwright code in a cloud browser.
               </p>
             </div>
 
@@ -316,7 +323,7 @@ export default function HomePage() {
                         </div>
                         <div>
                           <p className="text-muted-foreground">Session ID</p>
-                          <p className="font-mono font-semibold">
+                          <p className="font-mono font-semibold break-all">
                             {browserSession.sessionId}
                           </p>
                         </div>
@@ -340,9 +347,9 @@ export default function HomePage() {
                           id="task-input"
                           value={task}
                           onChange={(e) => setTask(e.target.value)}
-                          placeholder="Go to https://news.ycombinator.com/ and extract the first article title"
+                          placeholder={automationResults.length > 0 ? "Enter next task for the browser agent" : "Go to https://news.ycombinator.com/ and extract the first article title"}
                           disabled={runningAutomation}
-                          className="min-h-[100px] resize-none"
+                          className="min-h-[100px] resize-none placeholder:text-gray-600"
                           onKeyDown={(e) => {
                             if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                               e.preventDefault();
@@ -485,7 +492,7 @@ export default function HomePage() {
                   <div className="space-y-2">
                     <h3 className="font-semibold text-white">Create Browser</h3>
                     <p className="text-sm text-gray-500">
-                      Kernel provisions a secure cloud browser instance in &lt;300ms. Fully isolated and scalable.
+                      Kernel provisions a secure cloud browser instance in ~300ms. Fully isolated and scalable.
                     </p>
                   </div>
                 </CardContent>
