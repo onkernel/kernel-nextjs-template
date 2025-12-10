@@ -1,16 +1,17 @@
 # Kernel + Vercel Template
 
-A Next.js template demonstrating how to run browser automations in Vercel serverless functions, powered by Kernel.
+Next.js + Kernel template for running AI-powered browser automations with natural language on Vercel.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fkernel-nextjs-template&project-name=kernel-nextjs-template&repository-name=kernel-nextjs-template&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22kernel%22%2C%22protocol%22%3A%22other%22%7D%5D)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fonkernel%2Fkernel-nextjs-template&env=OPENAI_API_KEY&project-name=kernel-nextjs-template&repository-name=kernel-nextjs-template&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22kernel%22%2C%22productSlug%22%3A%22kernel%22%2C%22protocol%22%3A%22other%22%7D%5D)
+
 
 ## Overview
 
 This template shows how to:
 
-- Create cloud browsers with live view using the Kernel SDK
-- Connect automation frameworks to Kernel browsers via CDP
-- Run browser automations in Next.js API routes
+- Create serverless browsers with live view using the Kernel SDK
+- Describe browser tasks in natural language
+- Use an AI agent to execute browser automation code via AI SDK tools in Next.js API routes
 - Display live browser view and automation results in a modern Next.js UI
 
 ## Tech Stack
@@ -18,7 +19,8 @@ This template shows how to:
 - **Framework**: Next.js 15 with App Router
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui
-- **Browser Automation**: Kernel SDK + Playwright
+- **AI**: Vercel AI SDK with OpenAI GPT-5.1
+- **Browser Automation**: Kernel SDK + Kernel AI SDK (`@onkernel/ai-sdk`)
 - **Package Manager**: Bun
 - **Deployment**: Vercel
 
@@ -28,8 +30,8 @@ This template shows how to:
 
 - Node.js 18+
 - [Bun](https://bun.sh) (package manager)
-- [Bun](https://bun.sh) (package manager)
 - A Kernel account and API key
+- An OpenAI API key
 - Vercel account (optional, for deployment)
 
 ### Installation
@@ -62,16 +64,16 @@ This template shows how to:
    touch .env.local
    ```
 
-   Add your Kernel API key:
+   Add your API keys:
 
    ```
-   KERNEL_API_KEY=your_api_key_here
+   KERNEL_API_KEY=your_kernel_api_key_here
+   OPENAI_API_KEY=your_openai_api_key_here
    ```
 
 5. **Run the development server**:
 
    ```bash
-   bun dev
    bun dev
    ```
 
@@ -79,29 +81,34 @@ This template shows how to:
 
 ## How It Works
 
-1. **Browser Creation**: Click "Create Browser" to provision a headful Kernel browser with live view capabilities
-2. **Live View**: See your browser running in real-time through the embedded live view iframe
-3. **Automation**: Enter any URL and click "Run Automation" to navigate to it using Playwright over CDP
-4. **Results**: View execution metrics and page information returned from your automation
+1. **Create Browser**: Click "Create Browser" to provision a serverless Kernel browser with live view capabilities
+2. **Describe Your Task**: Enter what you want the browser to do in natural language (e.g., "Go to Hacker News and get the top article title")
+3. **Watch AI Execute**: The AI agent interprets your task and uses Kernel's AI SDK-compatible browser automation tool to execute it in real-time
+4. **View Results**: See the agent's response, step count, and click "View Steps" to inspect the generated code and execution details
 
 ## Code Structure
 
 ```
 app/
 ├── api/
+│   ├── agent/
+│   │   └── route.ts          # AI agent endpoint with browser automation tool
 │   ├── create-browser/
-│   │   └── route.ts          # Creates a headful Kernel browser
-│   └── run-automation/
-│       └── route.ts          # Connects via CDP and runs automation
+│   │   └── route.ts          # Creates a serverless Kernel browser
+│   └── delete-browser/
+│       └── route.ts          # Closes browser session
 ├── page.tsx                  # Main UI with live view and controls
 ├── layout.tsx                # Root layout
 └── globals.css               # Global styles
 
 components/
+├── Header.tsx                # App header with branding
+├── StepsOverlay.tsx          # Modal showing agent execution steps
 └── ui/                       # shadcn/ui components
     ├── button.tsx
     ├── card.tsx
-    └── input.tsx
+    ├── textarea.tsx
+    └── ...
 
 lib/
 └── utils.ts                  # Utility functions
@@ -117,7 +124,7 @@ import { Kernel } from "@onkernel/sdk";
 // Initialize Kernel client
 const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Create a headful browser with live view
+// Create a serverless browser with live view
 const browser = await kernel.browsers.create({
   stealth: true,
   headless: false,
@@ -131,26 +138,34 @@ return {
 };
 ```
 
-**Step 2: Run Automation** (`app/api/run-automation/route.ts`)
+**Step 2: Run AI Agent** (`app/api/agent/route.ts`)
 
 ```typescript
-import { chromium } from "playwright-core";
+import { openai } from "@ai-sdk/openai";
+import { playwrightExecuteTool } from "@onkernel/ai-sdk";
+import { Kernel } from "@onkernel/sdk";
+import { Experimental_Agent as Agent, stepCountIs } from "ai";
 
-// Connect Playwright to the Kernel browser via CDP
-const browser = await chromium.connectOverCDP(cdpWsUrl);
+// Initialize Kernel instance
+const kernel = new Kernel({ apiKey: process.env.KERNEL_API_KEY });
 
-// Get the default context and page
-const context = browser.contexts()[0];
-const page = context.pages()[0] || (await context.newPage());
+// Initialize the AI agent with GPT-5.1 and Kernel's AI SDK-compatible browser automation tool
+const agent = new Agent({
+  model: openai("gpt-5.1"),
+  tools: {
+    playwright_execute: playwrightExecuteTool({
+      client: kernel,
+      sessionId: sessionId,
+    }),
+  },
+  stopWhen: stepCountIs(20),
+  system: `You are a browser automation expert with access to a Playwright execution tool...`,
+});
 
-// Navigate and extract data
-await page.goto(url, { waitUntil: "domcontentloaded" });
-const title = await page.title();
-
-// Close Playwright connection (browser continues running)
-await browser.close();
-
-return { title, url };
+// Execute the agent with the user's task
+const { text, steps } = await agent.generate({
+  prompt: task, // e.g., "Go to news.ycombinator.com and get the first article title"
+});
 ```
 
 ## Deployment
@@ -163,26 +178,29 @@ return { title, url };
 
    - Go to [vercel.com](https://vercel.com)
    - Import your GitHub repository
-   - Add your `KERNEL_API_KEY` environment variable
+   - Add your environment variables (`KERNEL_API_KEY` and `OPENAI_API_KEY`)
    - Deploy!
 
 3. **Using Vercel Marketplace Integration**:
    - Install [Kernel from Vercel Marketplace](https://vercel.com/integrations/kernel)
-   - The integration will automatically add the API key to your project
+   - The integration will automatically add the Kernel API key to your project
+   - Add your `OPENAI_API_KEY` manually
    - Deploy your project
 
 ### Environment Variables
 
-Make sure to add this environment variable in your Vercel project settings:
+Make sure to add these environment variables in your Vercel project settings:
 
 - `KERNEL_API_KEY` - Your Kernel API key
+- `OPENAI_API_KEY` - Your OpenAI API key
 
 ## Learn More
 
 - [Kernel Documentation](https://docs.onkernel.com)
-- [Kernel API Reference](https://docs.onkernel.com/api-reference)
+- [Kernel AI SDK](https://www.onkernel.com/docs/integrations/vercel/ai-sdk)
+- [Vercel AI SDK Documentation](https://sdk.vercel.ai/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 
 ---
 
-Built with [Kernel](https://dashboard.onkernel.com) and [Vercel](https://vercel.com)
+Built with [Kernel](https://dashboard.onkernel.com), [Vercel AI SDK](https://sdk.vercel.ai), and [Vercel](https://vercel.com)
